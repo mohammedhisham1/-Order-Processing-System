@@ -15,6 +15,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'main.login'
 
 def create_app():
+    print("Starting create_app()...")  
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
