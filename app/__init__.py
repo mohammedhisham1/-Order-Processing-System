@@ -10,6 +10,8 @@ from flask_admin.contrib.sqla import ModelView
 
 load_dotenv()
 
+
+
 mail = Mail()
 login_manager = LoginManager()
 login_manager.login_view = 'main.login'
@@ -37,6 +39,8 @@ def create_app():
 
     try:
         db.init_app(app)
+        with app.app_context():
+            db.create_all()
         mail.init_app(app)
         login_manager.init_app(app)
         print(" Extensions initialized")
