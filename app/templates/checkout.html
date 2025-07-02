@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="mb-4">Checkout</h2>
+          {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+          <form method="post">
+            <h5 class="mb-3">Order Summary</h5>
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                <tr>
+                  <td>{{ item.product.name }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>${{ '%.2f'|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <h4 class="mt-3">Total: ${{ '%.2f'|format(total) }}</h4>
+            <hr>
+            <h5 class="mb-3">Payment Details</h5>
+            <div class="mb-3">
+              <label for="wallet_number" class="form-label">Wallet Number</label>
+              <input type="text" class="form-control" id="wallet_number" name="wallet_number" maxlength="10" required>
+            </div>
+            <div class="mb-3">
+              <label for="payment_details" class="form-label">Payment Details</label>
+              <input type="text" class="form-control" id="payment_details" name="payment_details" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">Place Order</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

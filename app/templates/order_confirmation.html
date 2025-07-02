@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card shadow-sm" style="max-width: 600px; width: 100%;">
+    <div class="card-body text-center">
+      <div class="mb-3">
+        <img src="https://img.icons8.com/fluency/96/000000/checked-checkbox.png" alt="Success" style="height: 64px;">
+      </div>
+      <h2 class="mb-3 text-success">Order Confirmed!</h2>
+      <p class="lead">Thank you for your purchase! Your order ID is <strong>{{ order.id }}</strong>.</p>
+      <h5 class="mt-4">Order Details</h5>
+      <ul class="list-group list-group-flush mb-3">
+        <li class="list-group-item">Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+        <li class="list-group-item">Total: <strong>${{ '%.2f'|format(order.total_amount) }}</strong></li>
+        <li class="list-group-item">Status: {% if order.paid %}<span class="badge bg-success">Paid</span>{% else %}<span class="badge bg-danger">Unpaid</span>{% endif %}</li>
+      </ul>
+      <h6>Items:</h6>
+      <ul class="list-group mb-4">
+        {% for item in order.items %}
+        <li class="list-group-item">{{ item.product.name }} (x{{ item.quantity }}) - ${{ '%.2f'|format(item.price * item.quantity) }}</li>
+        {% endfor %}
+      </ul>
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary">Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %} 

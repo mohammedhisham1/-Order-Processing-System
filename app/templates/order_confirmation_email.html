@@ -1,0 +1,11 @@
+<h2>Thank you for your order!</h2>
+<p>Order ID: <strong>{{ order.id }}</strong></p>
+<p>Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+<p>Total: <strong>${{ '%.2f'|format(order.total_amount) }}</strong></p>
+<h4>Items:</h4>
+<ul>
+{% for item in order.items %}
+  <li>{{ item.product.name }} (x{{ item.quantity }}) - ${{ '%.2f'|format(item.price * item.quantity) }}</li>
+{% endfor %}
+</ul>
+<p>We appreciate your business!</p> 

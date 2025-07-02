@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="py-5 text-center bg-white rounded shadow-sm mb-4">
+  <h1 class="display-5 fw-bold">Welcome to Order-System</h1>
+  <p class="lead mb-0">Shop the best products and enjoy fast, secure ordering!</p>
+</div>
+<div class="row g-4">
+  {% for product in products %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <img src="{{ product.image_url if product.image_url else 'https://via.placeholder.com/400x200?text=No+Image' }}" class="card-img-top product-img" alt="{{ product.name }}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p class="card-text">{{ product.description }}</p>
+        <p class="card-text fs-5 fw-bold">${{ product.price }}</p>
+        <p class="card-text mb-2">
+          {% if product.stock > 0 %}
+            <span class="badge bg-success">In Stock</span>
+          {% else %}
+            <span class="badge bg-danger">Out of Stock</span>
+          {% endif %}
+        </p>
+        {% if product.stock > 0 %}
+        <form method="post" action="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="mt-auto">
+          <div class="input-group">
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="max-width: 80px;">
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %} 

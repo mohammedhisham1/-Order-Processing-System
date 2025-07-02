@@ -1,0 +1,14 @@
+Hello,
+
+Thank you for your order!
+
+Order ID: {{ order.id }}
+Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}
+Total: ${{ '%.2f'|format(order.total_amount) }}
+
+Items:
+{% for item in order.items %}
+- {{ item.product.name }} (x{{ item.quantity }}) - ${{ '%.2f'|format(item.price * item.quantity) }}
+{% endfor %}
+
+We appreciate your business! 
