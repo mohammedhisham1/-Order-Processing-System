@@ -15,7 +15,7 @@ A simple online order management system built with Flask, featuring product cata
 
 ### 1. Clone the repository
 ```
-git clone [<your-repo-url>](https://github.com/mohammedhisham1/-Order-Processing-System.git)
+git clone https://github.com/mohammedhisham1/-Order-Processing-System.git
 cd Order-System
 ```
 
