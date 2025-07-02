@@ -33,6 +33,8 @@ def create_app():
         app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
         app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '')
         app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '')
+        app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@example.com')
+
         print(" Mail config loaded")
     except Exception as e:
         print(" Error loading config:", e)
