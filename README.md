@@ -62,6 +62,3 @@ docker run -p 5000:5000 order-system-app
 ```
 pytest
 ```
-
-## License
-MIT 
