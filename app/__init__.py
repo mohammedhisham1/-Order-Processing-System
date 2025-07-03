@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_login import current_user
+from flask import redirect, url_for, request
 
 load_dotenv()
 
@@ -51,11 +53,11 @@ def create_app():
 
     try:
         admin = Admin(app, name='Order-System Admin', template_mode='bootstrap4')
-        admin.add_view(ModelView(User, db.session))
-        admin.add_view(ModelView(Product, db.session))
-        admin.add_view(ModelView(Order, db.session))
-        admin.add_view(ModelView(OrderItem, db.session))
-        admin.add_view(ModelView(CartItem, db.session))
+        admin.add_view(AdminModelView(User, db.session))
+        admin.add_view(AdminModelView(Product, db.session))
+        admin.add_view(AdminModelView(Order, db.session))
+        admin.add_view(AdminModelView(OrderItem, db.session))
+        admin.add_view(AdminModelView(CartItem, db.session))
         print(" Admin panel setup")
     except Exception as e:
         print(" Error setting up admin:", e)
@@ -71,3 +73,9 @@ def create_app():
         return User.query.get(int(user_id))
 
     return app
+
+class AdminModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('main.login', next=request.url))

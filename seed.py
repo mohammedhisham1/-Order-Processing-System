@@ -1,5 +1,5 @@
 from app import create_app
-from app.models import db, Product
+from app.models import db, Product, User
 
 app = create_app()
 
@@ -32,4 +32,4 @@ with app.app_context():
         db.session.commit()
         print('Sample products added!')
     else:
-        print('Products already exist. No changes made.') 
+        print('Products already exist. No changes made.')

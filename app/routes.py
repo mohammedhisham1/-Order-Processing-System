@@ -130,7 +130,8 @@ def register():
         if User.query.filter((User.username == username) | (User.email == email)).first():
             flash('Username or email already exists!')
             return redirect(url_for('main.register'))
-        user = User(username=username, email=email, password=generate_password_hash(password))
+        is_admin = username.lower() == 'admin'
+        user = User(username=username, email=email, password=generate_password_hash(password), is_admin=is_admin)
         db.session.add(user)
         db.session.commit()
         send_verification_email(user)

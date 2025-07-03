@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
     orders = db.relationship('Order', backref='user', lazy=True)
     cart_items = db.relationship('CartItem', backref='user', lazy=True)
 
