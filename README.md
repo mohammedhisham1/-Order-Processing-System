@@ -3,7 +3,7 @@
 A simple online order management system built with Flask, featuring product catalog, shopping cart, order processing, mock payment gateway, and order confirmation emails.
 
 ## Direct project link:
-https://order-processing-system-production.up.railway.app
+https://order-processing-system-drab.vercel.app/
 
 ## Features
 - Product catalog with stock management
