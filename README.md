@@ -28,11 +28,15 @@ pip install -r requirements.txt
 ```
 
 ### 3. Set up environment variables
-Edit `app/__init__.py` and set your email credentials for Flask-Mail:
+Copy `.env.example` to `.env` and fill in your values:
+```bash
+cp .env.example .env
 ```
-MAIL_USERNAME = 'your-email@gmail.com'
-MAIL_PASSWORD = 'your-email-password'
-```
+
+Edit the `.env` file with your actual values:
+- `SECRET_KEY`: Generate a secure random string
+- `DATABASE_URL`: For production, use a cloud database (PostgreSQL recommended)
+- Email settings for order confirmations
 
 ### 4. Initialize the database
 ```
@@ -43,7 +47,36 @@ python seed.py
 ```
 python run.py
 ```
-Visit [http://localhost:5000](http://localhost:5000)
+Visit [http://localhost:5001](http://localhost:5001)
+
+## Deployment
+
+### Vercel Deployment
+
+1. **Prepare Environment Variables**:
+   - In Vercel dashboard, go to your project settings
+   - Add the following environment variables:
+     - `SECRET_KEY`: A secure random string
+     - `DATABASE_URL`: PostgreSQL connection string (recommended: Vercel Postgres)
+     - `FLASK_ENV`: `production`
+     - Email settings: `MAIL_SERVER`, `MAIL_USERNAME`, `MAIL_PASSWORD`, etc.
+
+2. **Database Setup**:
+   - **Important**: SQLite doesn't work with Vercel (serverless)
+   - Use Vercel Postgres, PlanetScale, or another cloud database
+   - Set `DATABASE_URL` to your PostgreSQL connection string
+
+3. **Deploy**:
+   ```bash
+   vercel --prod
+   ```
+
+### Common Vercel Issues & Solutions:
+
+- **500 Errors**: Usually caused by missing environment variables or database connection issues
+- **Database**: Make sure to use PostgreSQL, not SQLite
+- **Secret Key**: Must be set in Vercel environment variables
+- **Admin Panel**: Disabled in production by default (can be enabled by setting `FLASK_ENV=development`)
 
 ## Docker Usage
 

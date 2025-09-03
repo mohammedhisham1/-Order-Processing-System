@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "run.py",
@@ -10,5 +11,13 @@
       "src": "/(.*)",
       "dest": "run.py"
     }
-  ]
+  ],
+  "env": {
+    "PYTHONPATH": "/var/task"
+  },
+  "functions": {
+    "run.py": {
+      "maxDuration": 30
+    }
+  }
 }

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import db, Product, User, Order, OrderItem, CartItem
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,8 +10,13 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    products = Product.query.all()
-    return render_template('index.html', products=products)
+    try:
+        products = Product.query.all()
+        return render_template('index.html', products=products)
+    except Exception as e:
+        current_app.logger.error(f"Error in index route: {e}")
+        flash('An error occurred while loading products.')
+        return render_template('index.html', products=[])
 
 @main_bp.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
@@ -52,53 +57,72 @@ def remove_from_cart(product_id):
 @main_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
-    if not cart_items:
-        flash('Your cart is empty!')
-        return redirect(url_for('main.index'))
-    items = []
-    total = 0
-    for item in cart_items:
-        product = item.product
-        if not product or product.stock < item.quantity:
-            logging.warning(f"User {current_user.id} attempted to order out-of-stock product {item.product_id}.")
-            flash(f'Product {product.name if product else item.product_id} is out of stock!')
-            return redirect(url_for('main.cart'))
-        items.append({'product': product, 'quantity': item.quantity, 'subtotal': product.price * item.quantity})
-        total += product.price * item.quantity
-    error = None
-    if request.method == 'POST':
-        wallet_number = request.form.get('wallet_number')
-        payment_details = request.form.get('payment_details')
-        if not wallet_number or not payment_details:
-            error = 'Please enter all payment details.'
-        elif len(wallet_number) != 10 or not wallet_number.isdigit():
-            error = 'Wallet number must be 10 digits.'
-        else:
-            payment_success = process_payment(total, current_user, wallet_number, payment_details)
-            if payment_success:
-                order = Order(user_id=current_user.id, total_amount=total, paid=True)
-                db.session.add(order)
-                db.session.flush()
-                for item in items:
-                    order_item = OrderItem(order_id=order.id, product_id=item['product'].id, quantity=item['quantity'], price=item['product'].price)
-                    db.session.add(order_item)
-                    item['product'].stock -= item['quantity']
-                # Clear cart
-                CartItem.query.filter_by(user_id=current_user.id).delete()
-                db.session.commit()
-                logging.info(f"Order {order.id} placed by user {current_user.id} for ${total}.")
-                email_sent = send_order_confirmation(current_user.email, order)
-                if not email_sent:
-                    logging.error(f"Order {order.id}: Failed to send confirmation email to {current_user.email}.")
-                    flash('Order placed, but failed to send confirmation email. Please contact support.', 'warning')
-                else:
-                    flash('Order placed successfully!')
-                return redirect(url_for('main.order_confirmation', order_id=order.id))
+    try:
+        cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+        if not cart_items:
+            flash('Your cart is empty!')
+            return redirect(url_for('main.index'))
+        
+        items = []
+        total = 0
+        for item in cart_items:
+            product = item.product
+            if not product or product.stock < item.quantity:
+                current_app.logger.warning(f"User {current_user.id} attempted to order out-of-stock product {item.product_id}.")
+                flash(f'Product {product.name if product else item.product_id} is out of stock!')
+                return redirect(url_for('main.cart'))
+            items.append({'product': product, 'quantity': item.quantity, 'subtotal': product.price * item.quantity})
+            total += product.price * item.quantity
+        
+        error = None
+        if request.method == 'POST':
+            wallet_number = request.form.get('wallet_number')
+            payment_details = request.form.get('payment_details')
+            if not wallet_number or not payment_details:
+                error = 'Please enter all payment details.'
+            elif len(wallet_number) != 10 or not wallet_number.isdigit():
+                error = 'Wallet number must be 10 digits.'
             else:
-                logging.warning(f"Payment failed for user {current_user.id} during checkout.")
-                error = 'Payment failed! Please check your details.'
-    return render_template('checkout.html', items=items, total=total, error=error)
+                try:
+                    payment_success = process_payment(total, current_user, wallet_number, payment_details)
+                    if payment_success:
+                        order = Order(user_id=current_user.id, total_amount=total, paid=True)
+                        db.session.add(order)
+                        db.session.flush()
+                        for item in items:
+                            order_item = OrderItem(order_id=order.id, product_id=item['product'].id, quantity=item['quantity'], price=item['product'].price)
+                            db.session.add(order_item)
+                            item['product'].stock -= item['quantity']
+                        # Clear cart
+                        CartItem.query.filter_by(user_id=current_user.id).delete()
+                        db.session.commit()
+                        current_app.logger.info(f"Order {order.id} placed by user {current_user.id} for ${total}.")
+                        
+                        try:
+                            email_sent = send_order_confirmation(current_user.email, order)
+                            if not email_sent:
+                                current_app.logger.error(f"Order {order.id}: Failed to send confirmation email to {current_user.email}.")
+                                flash('Order placed, but failed to send confirmation email. Please contact support.', 'warning')
+                            else:
+                                current_app.logger.info(f"Order {order.id}: Confirmation email sent to {current_user.email}.")
+                                flash('Order placed successfully! Confirmation email sent.', 'success')
+                        except Exception as email_error:
+                            current_app.logger.error(f"Email error for order {order.id}: {email_error}")
+                            flash('Order placed successfully, but email notification failed.', 'warning')
+                        
+                        return redirect(url_for('main.order_confirmation', order_id=order.id))
+                    else:
+                        error = 'Payment failed. Please try again.'
+                except Exception as payment_error:
+                    current_app.logger.error(f"Payment processing error: {payment_error}")
+                    error = 'Payment processing failed. Please try again.'
+        
+        return render_template('checkout.html', items=items, total=total, error=error)
+    
+    except Exception as e:
+        current_app.logger.error(f"Error in checkout route: {e}")
+        flash('An error occurred during checkout. Please try again.')
+        return redirect(url_for('main.cart'))
 
 @main_bp.route('/order_confirmation/<int:order_id>')
 @login_required
