@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, send_from_directory, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import db, Product, User, Order, OrderItem, CartItem
 from werkzeug.security import generate_password_hash, check_password_hash
 from .payment_gateway import process_payment
 from .email_utils import send_order_confirmation, send_verification_email
 import logging
+import os
 
 main_bp = Blueprint('main', __name__)
 
@@ -158,6 +159,13 @@ def verify_email(token):
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
+@main_bp.route('/favicon.ico')
+def favicon():
+    try:
+        return send_from_directory(os.path.join(current_app.root_path, 'static'), 'favicon.ico')
+    except:
+        return '', 204  # No content if favicon not found
 
 # Global error handler for 500 errors
 @main_bp.app_errorhandler(500)
