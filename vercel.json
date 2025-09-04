@@ -13,7 +13,5 @@
     }
   ],
   "env": {
-    "PYTHONPATH": ".",
-    "SUPABASE_DATABASE_URL": "postgresql://postgres.sdstdzruhcfimbwhtupc:n93yb?_HE_V75u_@aws-1-eu-central-1.pooler.supabase.com:5432/postgres"
-  }
+    "PYTHONPATH": "."  }
 }
