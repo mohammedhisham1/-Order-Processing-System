@@ -13,5 +13,7 @@
     }
   ],
   "env": {
-    "PYTHONPATH": "."  }
+    "PYTHONPATH": ".",
+    "SUPABASE_DATABASE_URL": ""
+  }
 }
