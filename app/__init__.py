@@ -27,18 +27,14 @@ def create_app():
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-local-only')
         print("✓ SECRET_KEY loaded")
         
-        # Use in-memory SQLite for Vercel deployment
-        database_url = os.environ.get('SQLALCHEMY_DATABASE_URI')
+        # Use Supabase PostgreSQL database
+        database_url = os.environ.get('SUPABASE_DATABASE_URL') or os.environ.get('DATABASE_URL')
         if not database_url:
-            # Check if we're in a serverless environment (Vercel)
-            if os.environ.get('VERCEL') or os.environ.get('VERCEL_ENV'):
-                # Use in-memory database for serverless
-                database_url = 'sqlite:///:memory:'
-                print("✓ Using in-memory database for serverless environment")
-            else:
-                # Use local file database for development
-                database_url = 'sqlite:///instance/order_system.db'
-                print("✓ Using file database for local development")
+            # Fallback to SQLite for local development
+            database_url = 'sqlite:///instance/order_system.db'
+            print("✓ Using SQLite for local development")
+        else:
+            print("✓ Using Supabase PostgreSQL database")
         
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -60,19 +56,6 @@ def create_app():
         db.init_app(app)
         with app.app_context():
             db.create_all()
-            # Seed basic data if using in-memory database
-            if 'memory' in app.config['SQLALCHEMY_DATABASE_URI']:
-                from .models import Product
-                # Add some basic products if none exist
-                if Product.query.count() == 0:
-                    basic_products = [
-                        Product(name='Sample Product 1', price=10.99, stock=50, description='A sample product for testing'),
-                        Product(name='Sample Product 2', price=25.50, stock=30, description='Another sample product'),
-                    ]
-                    for product in basic_products:
-                        db.session.add(product)
-                    db.session.commit()
-                    print("✓ Basic products seeded")
         mail.init_app(app)
         login_manager.init_app(app)
         print("✓ Extensions initialized")
