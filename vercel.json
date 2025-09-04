@@ -11,9 +11,5 @@
       "src": "/(.*)",
       "dest": "run.py"
     }
-  ],
-  "env": {
-    "PYTHONPATH": ".",
-    "SUPABASE_DATABASE_URL": ""
-  }
+  ]
 }
